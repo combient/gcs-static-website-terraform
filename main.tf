@@ -19,6 +19,30 @@ provider "google-beta" {
   project = var.project_id
 }
 
+resource "google_project_service" "compute-service" {
+  project = var.project_id
+  service = "compute.googleapis.com"
+
+  timeouts {
+    create = "10m"
+    update = "10m"
+  }
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "dns-service" {
+  project = var.project_id
+  service = "dns.googleapis.com"
+
+  timeouts {
+    create = "10m"
+    update = "10m"
+  }
+
+  disable_dependent_services = true
+}
+
 ## Typically only need one of these
 module "managed_zone" {
   source               = "./modules/managed_zone"
