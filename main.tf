@@ -48,7 +48,7 @@ module "managed_zone" {
   source               = "./modules/managed_zone"
   project_id           = var.project_id
   region               = var.region
-  managed_zone_name    = var.hosted_zone_name
+  managed_zone_name    = "${var.project_id}-zone"
   hosted_zone_dns_name = var.hosted_zone_dns_name
 }
 

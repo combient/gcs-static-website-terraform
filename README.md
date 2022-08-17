@@ -7,6 +7,7 @@ a DNS name such as www.example.com and require HTTPS.
 
 ## Preconditions
 
+- You have control over a domain and can edit its DNS-information. 
 - You have the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) installed. 
 - You are authenticated to a GCP project and have sufficient privileges assigned to create 
 these resources.
@@ -15,8 +16,8 @@ these resources.
 ## Preparation
 
 The configuration uses two files that need to be edited to your preferences and situation:
-1. backend.hcl - Simply names the bucket in which the state is stored
-2. terraform.tfvars - Your project settings
+1. `backend.hcl` - Simply names the bucket in which the state is stored
+2. `terraform.tfvars` - Your project settings
 
 ### Initiate the backend configuration
 
@@ -47,12 +48,27 @@ You can check on your SSl cert using the command
     --global \
     --format="get(name,managed.status)"
 
+## Check DNS
+
+The zone created will be assigned DNS servers automatically. You need to make sure your domain is configured to use these
+DNS servers. 
+
+Find your zone name (should be project ID with the suffix "-zone")
+
+    gcloud dns managed-zones list
+
+See the list of DNS-servers used by your zone
+
+    gcloud dns record-sets list -z $YOUR_ZONE_NAME
+
+Go to your registrar and enter the listed DNS-servers in the domain DNS configuration. 
+
 You can now visit your site. You will see the auto generated index.html file. 
 
 **Note that it is essential that the DNS resolution works for the TLS certificate to be provisioned 
 (otherwise you will see status `FAILED_NOT_VISIBLE`).** If you are delegating to Google Cloud DNS from
 some other master DNS server, note that the DNS servers on the google side are assigned automatically,
-and you have to update you delegating DNS record accordingly.
+and you have to update you delegating DNS record accordingly (see above).
 
 ## Upload your site
 
