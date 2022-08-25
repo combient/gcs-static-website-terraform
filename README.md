@@ -34,9 +34,15 @@ The configuration uses two files that need to be edited to your preferences and 
 
 ### Initiate the backend configuration
 
-Create file backend.hcl (or copy `backend.example,hcl`). Enter a unique bucket name. Then:
+Create the bucket to store the terraform state. Obviously terraform can't do this, so
 
-    terraform init -backend-config=backend.hcl  
+    gcloud alpha storage buckets create gs://$TERRAFORM_BUCKET_NAME
+
+where TERRAFORM_BUCKET_NAME is any unique name such as "com_mycorp_pyproj_tfstate".
+
+Create file backend.hcl (or copy `backend.example,hcl`). Enter the unique bucket name $TERRAFORM_BUCKET_NAME. Then:
+
+    terraform init -backend-config=backend.hcl   
 
 ### Provide values for project variables
 
