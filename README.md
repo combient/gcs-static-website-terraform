@@ -58,6 +58,10 @@ Apply the configuration
 
     terraform apply -auto-approve
 
+**Note that you already have enabled the compute and dns apis, this is likely to fail here.**. The calls to enable
+the APIs are asynchronous and there is no way in terraform to wait for the provisioning to complete. Just wait 5 minutes
+and run the command again. Terraform apply should always be idempotent.
+
 **Note that this will take up to half an hour to complete the first time**. It takes time to provision 
 the TLS certificate and for DNS changes to propagate. Go have lunch or something. 
 
