@@ -6,6 +6,18 @@ This terraform project can be used to create one or more hosted websites backed 
 Google Cloud Storage (GCS). The sites will have a global public IP, reachable using
 a DNS name such as www.example.com and require HTTPS. 
 
+## Usage of the repo
+
+You can simply incorporate the code into your project if you want.
+If you fork the repository, remember to add this repo as the upstream remote
+
+    git remote add upstream git@github.com:combient/gcs-static-website-terraform.git
+
+So you can refresh your fork later
+
+    git fetch upstream main
+    git rebase upstream/main 
+
 ## Prerequisites
 
 - You have control over a domain and can edit its DNS-information. 
