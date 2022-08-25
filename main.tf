@@ -47,19 +47,18 @@ resource "google_project_service" "dns-service" {
 module "managed_zone" {
   source               = "./modules/managed_zone"
   project_id           = var.project_id
-  region               = var.region
   managed_zone_name    = "${var.project_id}-zone"
   hosted_zone_dns_name = var.hosted_zone_dns_name
 }
 
 ## Create a webbucket per configuration entry var.websites
 module "webbucket" {
-  source            = "./modules/webbucket"
-  for_each = var.websites
-  name              = each.key
-  website_dns_name  = each.value["website_dns_name"] # No trailing period
-  index_page        = each.value["index_page"]
-  project_id        = var.project_id
-  region            = var.region
-  managed_zone_name = module.managed_zone.managed_zone_name
+  source             = "./modules/webbucket"
+  for_each           = var.websites
+  configuration_name = each.key
+  website_dns_name   = each.value["website_dns_name"] # No trailing period
+  index_page         = each.value["index_page"]
+  project_id         = var.project_id
+  region             = var.region
+  managed_zone_name  = module.managed_zone.managed_zone_name
 }

@@ -1,11 +1,12 @@
 # GCS static website terraform config
-_Simple terraform configuration for hosting a static website on GCP with HTTPS support_
+
+Simple terraform configuration for hosting a static website on GCP with HTTPS support_
 
 This terraform project can be used to create one or more hosted websites backed by 
 Google Cloud Storage (GCS). The sites will have a global public IP, reachable using
 a DNS name such as www.example.com and require HTTPS. 
 
-## Preconditions
+## Prerequisites
 
 - You have control over a domain and can edit its DNS-information. 
 - You have the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) installed. 

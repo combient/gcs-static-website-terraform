@@ -1,4 +1,3 @@
-
 resource "google_storage_bucket" "webbucket" {
   provider = google
   uniform_bucket_level_access = true
@@ -8,6 +7,7 @@ resource "google_storage_bucket" "webbucket" {
   location = var.region
   website {
     main_page_suffix = var.index_page
+    not_found_page   = var.not_found_page
   }
   force_destroy = true
 }
@@ -23,7 +23,7 @@ resource "google_storage_bucket_iam_binding" "binding" {
 
 ## External IP Address for load balancer
 resource "google_compute_global_address" "static" {
-  name        = "${var.name}-website-lb-ip"
+  name        = "${var.configuration_name}-website-lb-ip"
   description = "Static external IP address for hosting"
 }
 
@@ -37,28 +37,38 @@ resource "google_dns_record_set" "a" {
   rrdatas = [google_compute_global_address.static.address]
 }
 
+### Add a CNAME record for the www subdomain
+#resource "google_dns_record_set" "cname" {
+#  managed_zone = var.managed_zone_name
+#  name         = "www.${var.website_dns_name}."
+#  type         = "CNAME"
+#  ttl          = 300
+#
+#  rrdatas = ["${var.website_dns_name}."]
+#}
+
 ## HTTPS load balancer for backend bucket
 resource "google_compute_backend_bucket" "webbucket_backend" {
-  name        = "${var.name}-backend-webbucket"
+  name        = "${var.configuration_name}-backend-webbucket"
   bucket_name = google_storage_bucket.webbucket.name
   enable_cdn  = false
 }
 
 ## Partial HTTP load balancer redirects to HTTPS
 resource "google_compute_url_map" "static_http" {
-  name = "${var.name}-static-http-redirect"
+  name = "${var.configuration_name}-static-http-redirect"
   default_service = google_compute_backend_bucket.webbucket_backend.id
 }
 
 ## Route incoming HTTP requests to a URL map
 resource "google_compute_target_http_proxy" "static" {
-  name    = "${var.name}-static-http-proxy"
+  name    = "${var.configuration_name}-static-http-proxy"
   url_map = google_compute_url_map.static_http.id
 }
 
 ## Create a Google managed SSL certificate resource
 resource "google_compute_managed_ssl_certificate" "default" {
-  name = "${var.name}-cert"
+  name = "${var.configuration_name}-cert"
 
   managed {
     domains = [var.website_dns_name]
@@ -67,13 +77,13 @@ resource "google_compute_managed_ssl_certificate" "default" {
 
 ## Route incoming HTTPS requests to a URL map
 resource "google_compute_target_https_proxy" "default" {
-  name             = "${var.name}-proxy"
+  name             = "${var.configuration_name}-proxy"
   url_map          = google_compute_url_map.static_http.id
   ssl_certificates = [google_compute_managed_ssl_certificate.default.id]
 }
 
 resource "google_compute_global_forwarding_rule" "default" {
-  name                  = "${var.name}-ssl-proxy-xlb-forwarding-rule"
+  name                  = "${var.configuration_name}-ssl-proxy-xlb-forwarding-rule"
   provider              = google
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL"
@@ -83,7 +93,7 @@ resource "google_compute_global_forwarding_rule" "default" {
 }
 
 resource "google_compute_global_forwarding_rule" "static_http" {
-  name       = "${var.name}-static-forwarding-rule-http"
+  name       = "${var.configuration_name}-static-forwarding-rule-http"
   target     = google_compute_target_http_proxy.static.id
   port_range = "80"
   ip_address = google_compute_global_address.static.id
@@ -91,7 +101,7 @@ resource "google_compute_global_forwarding_rule" "static_http" {
 
 # SSL Policies
 resource "google_compute_ssl_policy" "tls12_modern" {
-  name            = "${var.name}-static-ssl-policy"
+  name            = "${var.configuration_name}-static-ssl-policy"
   profile         = "MODERN"
   min_tls_version = "TLS_1_2"
 }
@@ -100,10 +110,20 @@ output "name" {
   value = google_storage_bucket.webbucket.name
 }
 
-# Put a temporary "not found" file in the bucket for verification purposes
+# Put a temporary index file in the bucket for verification purposes
 resource "google_storage_bucket_object" "index" {
   depends_on = [google_storage_bucket.webbucket]
   name       = var.index_page
   content    = "<h1>${google_storage_bucket.webbucket.name}</h1>"
+  bucket     = google_storage_bucket.webbucket.name
+}
+
+# Put a temporary "not found" file in the bucket for verification purposes
+resource "google_storage_bucket_object" "not_found_page" {
+  depends_on = [google_storage_bucket.webbucket]
+  name       = var.not_found_page
+  content_type = "text/html"
+  content_encoding = "UTF-8"
+  source    = "404.html"
   bucket     = google_storage_bucket.webbucket.name
 }
