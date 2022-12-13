@@ -1,14 +1,21 @@
-# The bucket itself
+#locals
+
+locals {
+  create_index_page     = var.index_page.create ? 1 : 0
+  create_not_found_page = var.not_found_page.create ? 1 : 0
+}
+
+# The bucket itsel1
 resource "google_storage_bucket" "webbucket" {
   project                     = var.project_id
   provider                    = google
   uniform_bucket_level_access = true
   // The name of the bucket is the dns name without the trailing dot
-  name                        = var.website_dns_name
-  location                    = var.region
+  name     = var.website_dns_name
+  location = var.region
   website {
-    main_page_suffix = var.index_page
-    not_found_page   = var.not_found_page
+    main_page_suffix = var.index_page.name
+    not_found_page   = var.not_found_page.name
   }
   force_destroy = true
 }
@@ -35,8 +42,8 @@ resource "google_compute_global_forwarding_rule" "http" {
 
 # Set the default access control for readers to allow allUsers
 resource "google_storage_bucket_iam_binding" "binding" {
-  bucket  = google_storage_bucket.webbucket.name
-  role    = "roles/storage.objectViewer"
+  bucket = google_storage_bucket.webbucket.name
+  role   = "roles/storage.objectViewer"
   members = [
     "allUsers"
   ]
@@ -125,16 +132,18 @@ output "name" {
 
 # Put a temporary index file in the bucket for verification purposes
 resource "google_storage_bucket_object" "index" {
+  count      = local.create_index_page
   depends_on = [google_storage_bucket.webbucket]
-  name       = var.index_page
+  name       = var.index_page.name
   content    = "<h1>${google_storage_bucket.webbucket.name}</h1>"
   bucket     = google_storage_bucket.webbucket.name
 }
 
 # Put a temporary "not found" file in the bucket for verification purposes
 resource "google_storage_bucket_object" "not_found_page" {
+  count            = local.create_index_page
   depends_on       = [google_storage_bucket.webbucket]
-  name             = var.not_found_page
+  name             = var.not_found_page.name
   content_type     = "text/html"
   content_encoding = "UTF-8"
   source           = "404.html"

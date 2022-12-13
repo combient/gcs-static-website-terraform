@@ -6,7 +6,14 @@ variable "hosted_zone_dns_name" {
 }
 variable "websites" {
   type = map(object({
-    website_dns_name = string
-    index_page       = string
+    website_dns_name        = string
+    index_page = object({
+      name = string
+      create = bool 
+    })
+    not_found_page   = object({
+      name = string
+      create = bool 
+    })
   }))
 }

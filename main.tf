@@ -57,8 +57,21 @@ module "webbucket" {
   for_each           = var.websites
   configuration_name = each.key
   website_dns_name   = each.value["website_dns_name"] # No trailing period
+  not_found_page     = each.value["not_found_page"]
   index_page         = each.value["index_page"]
   project_id         = var.project_id
   region             = var.region
   managed_zone_name  = module.managed_zone.managed_zone_name
 }
+
+#module "github_integration" {
+#  source = "./modules/github_integration"
+#  for_each           = var.websites
+#  configuration_name = each.key
+#  github_action_name = "radar-deploy"
+#  org_name = var.org_name
+#  project_id = var.project_id
+#  project_number = var.project_number
+#  service_account_user_name = var.service_account_user_name
+#  website_dns_name = each.value["website_dns_name"]
+#}

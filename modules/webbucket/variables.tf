@@ -13,11 +13,15 @@ variable "configuration_name" {
 variable "website_dns_name" {
   description = "The dns name of the website without the trailing period. Example: yoursite.com"
 }
-variable "index_page" {
-  description = "The filename of the index page."
-  default = "index.html"
+variable "index_page"  {
+  type = object({
+    name = string
+    create = bool 
+  })
 }
-variable "not_found_page" {
-  description = "The filename 404 page."
-  default = "404.html"
+variable "not_found_page"  {
+  type = object({
+    name = string
+    create = bool 
+  })
 }
