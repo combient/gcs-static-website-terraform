@@ -32,6 +32,14 @@ The configuration uses two files that need to be edited to your preferences and 
 1. `backend.hcl` - Simply names the bucket in which the state is stored
 2. `terraform.tfvars` - Your project settings
 
+### Authenticate
+
+Either use a dedicated service account and its associated credentials as described [here](https://cloud.google.com/sdk/gcloud/reference/auth/activate-service-account)
+
+To use the default application credentials do
+
+    gcloud auth application-default login
+
 ### Initiate the backend configuration
 
 Create the bucket to store the terraform state. Obviously terraform can't do this, so
